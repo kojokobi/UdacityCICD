@@ -6,6 +6,8 @@ defaults: &defaults
   docker:
     - image: cimg/node:13.8.0
 
+
+
 commands:
   print_pipeline_id:
     description: "A very simple commnad for demo purposes"
@@ -45,6 +47,15 @@ jobs:
   #     - image: circleci/node:13.8.0
   #   steps:
   #     - run: echo world
+  my_intentional_error:
+    <<: *defaults 
+    steps:
+      - run: exit 1
+      - run:
+          name: onError
+          command: echo "Hello error"
+          when: on_fail
+
 
   my_pipeline_id:
     <<: *defaults
@@ -60,4 +71,5 @@ workflows:
       #     requires:
       #       - print_hello
       - my_pipeline_id
+      - my_intentional_error
           
