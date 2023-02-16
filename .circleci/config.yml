@@ -4,7 +4,7 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: circleci/node:13.8.0
+    - image: cimg/node:13.8.0
 
 commands:
   print_pipeline_id:
