@@ -6,11 +6,15 @@ defaults: &defaults
   docker:
     - image: circleci/node:13.8.0
 
-command:
+commands:
   print_pipeline_id:
-    - run: echo ${CIRCLE_WORKFLOW_ID}
-
-
+    description: "A very simple commnad for demo purposes"
+    parameters:
+      to:
+        type: string
+        default: "world"
+    steps:
+      - run: echo Hello << parameters.to>>. My my workflow id is = ${CIRCLE_WORKFLOW_ID}
 
 
 # orbs:
@@ -44,8 +48,8 @@ jobs:
 
   my_pipeline_id:
     <<: *defaults
-      steps:
-        - print_pipeline_id
+    steps:
+      - print_pipeline_id
 
 workflows:
   my_workflow:
