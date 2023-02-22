@@ -1,0 +1,14 @@
+---
+# - name: "hello world webpage"
+#   hosts: all
+#   roles: 
+#     - prepare
+    # - apache
+- name: Amazon EC2 WebServer SetUp
+  hosts: all
+  user: ubuntu
+  become: true
+  become_method: sudo
+  become_user: root
+  roles:
+    - setup

@@ -29,7 +29,6 @@ jobs:
   
   create_infrastructure:
     docker:
-      # - image: amazon/aws-cli
       - image: cimg/aws:2023.01
     steps:
       - checkout
@@ -85,6 +84,24 @@ jobs:
   #   steps:
   #     - print_pipeline_id
 
+  configure_infrastructure: 
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["e8:8c:9d:22:3d:ac:9d:a4:a0:81:e7:cd:14:f8:06:48"]
+      - run:
+          name: Install dependencies
+          command: |
+            # install the dependencies needed for your playbook
+            apk add --update ansible 
+      - run:
+          name: Configure server
+          command: |
+            ansible-playbook -i inventory.txt main.yml
+
+
 workflows:
   my_workflow:
     jobs:
@@ -95,5 +112,6 @@ workflows:
       #       - print_hello
       # - my_pipeline_id
       # - my_intentional_error
-      - create_infrastructure
+      # - create_infrastructure
+      - conconfigure_infrastructure
           
