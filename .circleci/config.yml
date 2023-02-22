@@ -113,5 +113,5 @@ workflows:
       # - my_pipeline_id
       # - my_intentional_error
       # - create_infrastructure
-      - conconfigure_infrastructure
+      - configure_infrastructure
           
