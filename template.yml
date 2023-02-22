@@ -1,0 +1,158 @@
+
+Parameters:
+  DefaultVPCID: 
+    Description: An existing VPC Id to use
+    Type: String 
+    Default: vpc-0989147bf72e2e182
+  
+  ImageToUse:
+    Description: Linux Image to use
+    Type: String
+    Default: ami-0557a15b87f6559cf
+
+  DefaultSubnetId:
+    Description: DefaultSubnetId
+    Type: String
+    Default: subnet-072cd7074c33ebb4e
+
+  # ImageIdToUse:
+  #   Description: The Image Id to use
+  #   Type: AWS::EC2::Image::Id
+  #   Default: ami-00874d747dde814fa
+  
+  InstanceType:
+    Description: The type of server instance to use
+    Type: String
+    Default: t3.micro
+  
+  # CpusCount:
+  #   Type: Number
+  #   Description: Number of virtual cpus to use for this instance
+  #   Default: 2
+
+  # ThreadsPerCore:
+  #   Type: Number
+  #   Description: Threads per core 
+  #   Default: 1
+
+
+Resources:
+ 
+  # LogicalID:
+  #   Type: AWS::IAM::ManagedPolicy
+  #   Properties:
+  #     Description: Policy for granting AWS S3 readOnly access
+  #     PolicyDocument:   # Required
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         -
+  #           Sid: AllowS3ReadOnlyAccess
+  #           Effect: Allow
+  #           Action:
+  #             - iam:ListAccountAliases
+  #             - iam:ListUsers
+  #             - iam:GetAccountSummary
+  #           Resource: "*"
+  
+  # RootServerRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument: 
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow 
+  #           Principal:
+  #             Service:
+  #                - ec2.amazonaws.com
+  #           Action:
+  #             - 'sts:AssumeRole'
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+  #       # - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+  # Access to download achieve from S3
+  S3ReadOnlyEC2Access:
+      Type: AWS::IAM::Role
+      Properties:
+        
+        AssumeRolePolicyDocument:  # Required
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - ec2.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+          # arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+  
+
+  ServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: # Required
+        - !Ref S3ReadOnlyEC2Access
+
+  # S3ReadOnlyAccessProfile:
+  #   Type: AWS::IAM::InstanceProfile
+  #   Properties:
+  #     Roles:
+  #       - !Ref S3ReadOnlyEC2Access
+          
+
+  WebAccessSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22 # Required
+      # VPCID should be an importedValue TODO
+      VpcId: !Ref DefaultVPCID
+        # Fn::ImportValue:
+        #  !Sub "${Challenge2EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+      # - IpProtocol: tcp
+      #   FromPort: 80
+      #   ToPort: 80
+      #   CidrIp: 0.0.0.0/0
+      # - IpProtocol: tcp
+      #   FromPort: 3000
+      #   ToPort: 3000
+      #   CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      # SecurityGroupEgress:
+      # - IpProtocol: -1
+      #   FromPort: -1
+      #   ToPort: -1
+      #   CidrIp: 0.0.0.0/0
+
+  ServerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Sub ${ImageToUse}
+      KeyName: udacity
+      InstanceType: !Ref InstanceType
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true 
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref WebAccessSecGroup
+            # - Ref: S3ReadOnlyEC2Access
+          SubnetId: !Ref DefaultSubnetId
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 10
+            VolumeType: gp2
+  
+
+  # aws cloudformation create-stack --stack-name TestStack --template-body file://./test.yml  --capabilities "CAPABILITY_IAM" "CAPABILITY_NAME"
+  # ssh -i "id_rsa" ubuntu@ec2-44-192-123-178.compute-1.amazonaws.com
+  # ssh -i  ubuntu@ec2-44-192-123-178.compute-1.amazonaws.com
+
+  # Corrections
+  # Proposed Solution
+  # Methodology
+  # Updated 02 and 03
