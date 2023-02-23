@@ -142,7 +142,19 @@ jobs:
             #   return 1
             # fi  
             command: return 1
-      - destroy_environment
+      
+
+  # create s3 bucket
+  # resources:
+  #   docker:
+  #     - image: cimg/aws:2023.01
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Destroy AWS provisioned infrastructure
+  #         command: |
+  #           aws cloudformation delete-stack \
+  #             --stack-name TestServerInstance
 
 
 workflows:
@@ -158,5 +170,5 @@ workflows:
       # - create_infrastructure
       - create_infrastructure
       - smoke_test
-      # - destroy_infrastructure
+      - destroy_infrastructure
           
