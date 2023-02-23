@@ -40,6 +40,19 @@ jobs:
               --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
               --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
               --region us-east-1
+
+  destroy_infrastructure:
+    docker:
+      - image: cimg/aws:2023.01
+    steps:
+      - checkout
+      - run:
+          name: Destroy AWS provisioned infrastructure
+          command: |
+            aws cloudformation delete-stack \
+              --stack-name TestServerInstance
+              
+
       # Fail the job intentionally to simulate an error.
       # Uncomment the line below if you want to fail the current step
       # - run: return 1
@@ -105,6 +118,24 @@ jobs:
           command: |
             ansible-playbook -i inventory.txt main.yml
 
+  # Exercise: Smoke Testing
+smoke_test:
+ docker:
+   - image: alpine:latest
+ steps:
+   - run: apk add --update curl
+   - run:
+       name: smoke test
+       command: |
+         URL="https://blog.udacity.com/"
+         # Test if website exists
+         if curl -s --head ${URL} 
+         then
+           return 0
+         else
+           return 1
+         fi  
+
 
 workflows:
   my_workflow:
@@ -117,5 +148,7 @@ workflows:
       # - my_pipeline_id
       # - my_intentional_error
       # - create_infrastructure
-      - configure_infrastructure
+      # - configure_infrastructure
+      - smoke-test
+      # - destroy_infrastructure
           
